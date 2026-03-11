@@ -1,0 +1,1331 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Automotive Cybersecurity Lab — Live Attack Terminal</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --bg0: #050a12;
+      --bg1: #08101a;
+      --bg2: #0c1726;
+      --bg3: #112236;
+      --bdr: #162a42;
+      --bdr2: #1e3a5a;
+      --blue: #3b82f6;
+      --cyan: #0ea5e9;
+      --green: #10b981;
+      --red: #ef4444;
+      --redh: #f87171;
+      --orange: #f97316;
+      --yellow: #eab308;
+      --purple: #a855f7;
+      --pink: #ec4899;
+      --term-bg: #000000;
+      --term-cyan: #0ff;
+      --term-green: #0f0;
+      --term-dim: #888;
+      --term-red: #f00;
+      --white: #f0f4f8;
+      --muted: #64748b;
+      --dim: #1e3a5a;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0
+    }
+
+    html,
+    body {
+      height: 100%;
+      font-family: 'Inter', sans-serif;
+      background: var(--bg0);
+      color: var(--white);
+      overflow-x: hidden
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+      height: 5px
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--bg1)
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--bdr2);
+      border-radius: 3px
+    }
+
+    /* ── HEADER ── */
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 24px;
+      background: var(--bg1);
+      border-bottom: 1px solid var(--bdr);
+      position: sticky;
+      top: 0;
+      z-index: 300
+    }
+
+    .hbrand {
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .hlogo {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: linear-gradient(135deg, var(--blue), var(--cyan));
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      box-shadow: 0 0 15px rgba(59, 130, 246, .4)
+    }
+
+    .htitle {
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: -.3px
+    }
+
+    .hsub {
+      font-size: 10px;
+      color: var(--muted);
+      margin-top: 2px
+    }
+
+    .hright {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap
+    }
+
+    .badge {
+      padding: 5px 12px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      border: 1px solid
+    }
+
+    .b-sim {
+      color: var(--muted);
+      border-color: var(--bdr)
+    }
+
+    .b-ok {
+      color: var(--green);
+      border-color: rgba(16, 185, 129, .4);
+      background: rgba(16, 185, 129, .07)
+    }
+
+    .b-warn {
+      color: var(--orange);
+      border-color: rgba(249, 115, 22, .4);
+      background: rgba(249, 115, 22, .07);
+      animation: pr 1.5s infinite
+    }
+
+    .b-crit {
+      color: var(--red);
+      border-color: rgba(239, 68, 68, .5);
+      background: rgba(239, 68, 68, .1);
+      animation: pr 1s infinite
+    }
+
+    .lat-badge {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--cyan);
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid rgba(14, 165, 233, .3);
+      background: rgba(14, 165, 233, .06)
+    }
+
+    /* ── MAIN LAYOUT ── */
+    .app {
+      display: grid;
+      grid-template-columns: 460px 1fr 300px;
+      gap: 12px;
+      padding: 12px;
+      min-height: calc(100vh - 65px)
+    }
+
+    /* ── TERMINAL TILE ── */
+    .term-wrap {
+      background: var(--bg1);
+      border: 1px solid var(--bdr);
+      border-radius: 10px;
+      display: flex;
+      flex-direction: column;
+      height: calc(100vh - 90px);
+      overflow: hidden
+    }
+
+    .term-head {
+      display: flex;
+      align-items: center;
+      padding: 9px 12px;
+      background: var(--bg2);
+      border-bottom: 1px solid var(--bdr)
+    }
+
+    .th-dots {
+      display: flex;
+      gap: 6px;
+      flex: 1
+    }
+
+    .td {
+      width: 11px;
+      height: 11px;
+      border-radius: 50%
+    }
+
+    .td-r {
+      background: #ff5f56
+    }
+
+    .td-y {
+      background: #ffbd2e
+    }
+
+    .td-g {
+      background: #27c93f
+    }
+
+    .th-title {
+      flex: 2;
+      text-align: center;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--muted)
+    }
+
+    .th-user {
+      flex: 1;
+      text-align: right;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      color: var(--term-green);
+      font-weight: 700
+    }
+
+    /* Stage Tracker inside Terminal */
+    .term-stages {
+      display: flex;
+      gap: 4px;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--bdr);
+      flex-wrap: wrap
+    }
+
+    .ts-block {
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: var(--bg2);
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      border: 1px solid var(--bdr);
+      font-weight: 700;
+      letter-spacing: .3px
+    }
+
+    .ts-block.active {
+      border-color: var(--term-green);
+      color: var(--term-green);
+      background: rgba(0, 255, 0, .08);
+      box-shadow: 0 0 10px rgba(0, 255, 0, .2)
+    }
+
+    .ts-block.done {
+      border-color: var(--cyan);
+      color: var(--cyan);
+      background: rgba(14, 165, 233, .08)
+    }
+
+    /* Mission Banner */
+    .term-mission {
+      padding: 12px 16px;
+      background: rgba(14, 165, 233, .05);
+      border-bottom: 1px dashed var(--bdr);
+      position: relative
+    }
+
+    .m-title {
+      color: var(--cyan);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 10px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .m-title::before {
+      content: '🎯';
+      font-size: 12px
+    }
+
+    .m-text {
+      font-size: 13px;
+      color: var(--white);
+      line-height: 1.4;
+      margin-bottom: 8px
+    }
+
+    .m-hint-btn {
+      background: rgba(234, 179, 8, .1);
+      border: 1px solid rgba(234, 179, 8, .4);
+      color: var(--yellow);
+      padding: 5px 12px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px
+    }
+
+    .m-hint-btn:hover {
+      background: rgba(234, 179, 8, .2);
+      box-shadow: 0 0 10px rgba(234, 179, 8, .3)
+    }
+
+    .m-hint-text {
+      display: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 11px;
+      color: var(--yellow);
+      margin-top: 8px;
+      padding: 8px;
+      background: rgba(234, 179, 8, .05);
+      border-radius: 4px
+    }
+
+    /* Terminal Body */
+    .term-body {
+      flex: 1;
+      background: var(--term-bg);
+      padding: 14px;
+      overflow-y: auto;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px;
+      line-height: 1.6;
+      color: #ccc
+    }
+
+    .tl {
+      margin-bottom: 4px;
+      word-break: break-all;
+      white-space: pre-wrap
+    }
+
+    .tl-cmd {
+      color: var(--white);
+      font-weight: 700
+    }
+
+    .tl-pmpt {
+      color: var(--term-green);
+      margin-right: 8px
+    }
+
+    .tl-err {
+      color: var(--term-red)
+    }
+
+    .tl-sys {
+      color: var(--term-cyan)
+    }
+
+    .tl-sys-warn {
+      color: var(--yellow)
+    }
+
+    /* Terminal Input */
+    .term-input-row {
+      display: flex;
+      align-items: center;
+      padding: 10px 14px;
+      background: var(--term-bg);
+      border-top: 1px solid #222
+    }
+
+    .ti-pmpt {
+      color: var(--term-green);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      font-weight: 700;
+      margin-right: 8px;
+      white-space: nowrap
+    }
+
+    .ti-field {
+      flex: 1;
+      background: transparent;
+      border: none;
+      outline: none;
+      color: var(--white);
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px;
+      caret-color: var(--term-green)
+    }
+
+    /* ── CARDS (Center & Right) ── */
+    .card {
+      background: var(--bg1);
+      border: 1px solid var(--bdr);
+      border-radius: 10px;
+      padding: 14px;
+      transition: border-color .25s
+    }
+
+    .card:hover {
+      border-color: var(--bdr2)
+    }
+
+    .ctitle {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.8px;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 12px
+    }
+
+    .ctitle::before {
+      content: '';
+      width: 3px;
+      height: 12px;
+      border-radius: 2px;
+      background: var(--cyan);
+      flex-shrink: 0
+    }
+
+    /* Attack path */
+    .netpath {
+      padding: 10px;
+      border-radius: 8px;
+      background: var(--bg2);
+      border: 1px solid var(--bdr);
+      margin-bottom: 8px
+    }
+
+    .nprow {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 4px
+    }
+
+    .npnode {
+      padding: 4px 9px;
+      border-radius: 6px;
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: .3px;
+      border: 1px solid;
+      white-space: nowrap;
+      transition: all .3s
+    }
+
+    .nparr {
+      color: var(--dim);
+      font-size: 13px
+    }
+
+    .np-att {
+      color: var(--red);
+      border-color: rgba(239, 68, 68, .4);
+      background: rgba(239, 68, 68, .06)
+    }
+
+    .np-cell {
+      color: var(--cyan);
+      border-color: rgba(14, 165, 233, .4);
+      background: rgba(14, 165, 233, .05)
+    }
+
+    .np-tcu {
+      color: var(--yellow);
+      border-color: rgba(234, 179, 8, .4);
+      background: rgba(234, 179, 8, .05)
+    }
+
+    .np-gw {
+      color: var(--blue);
+      border-color: rgba(59, 130, 246, .4);
+      background: rgba(59, 130, 246, .05)
+    }
+
+    .np-can {
+      color: var(--purple);
+      border-color: rgba(168, 85, 247, .4);
+      background: rgba(168, 85, 247, .05)
+    }
+
+    .np-ecu {
+      color: var(--green);
+      border-color: rgba(16, 185, 129, .4);
+      background: rgba(16, 185, 129, .05)
+    }
+
+    .npnode.lit {
+      transform: scale(1.08);
+      filter: brightness(1.3)
+    }
+
+    .npnode.hit {
+      animation: pr 1s infinite
+    }
+
+    /* Gauges */
+    .gauges {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-bottom: 12px
+    }
+
+    .gauge {
+      background: var(--bg2);
+      border: 1px solid var(--bdr);
+      border-radius: 8px;
+      padding: 12px 8px;
+      text-align: center
+    }
+
+    .gauge.danger {
+      border-color: rgba(239, 68, 68, .5);
+      background: rgba(239, 68, 68, .05);
+      animation: pr 2s infinite
+    }
+
+    .glbl {
+      font-size: 9px;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 6px
+    }
+
+    .gval {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 20px;
+      font-weight: 700;
+      line-height: 1
+    }
+
+    .gunit {
+      font-size: 8px;
+      color: var(--muted);
+      margin-top: 4px
+    }
+
+    .cv-g {
+      color: var(--green)
+    }
+
+    .cv-r {
+      color: var(--red)
+    }
+
+    .cv-o {
+      color: var(--orange)
+    }
+
+    .cv-c {
+      color: var(--cyan)
+    }
+
+    .cv-m {
+      color: var(--muted)
+    }
+
+    /* ECU grid */
+    .ecu-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 6px
+    }
+
+    .ecu {
+      background: var(--bg2);
+      border: 1px solid var(--bdr);
+      border-radius: 8px;
+      padding: 8px 12px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: all .3s
+    }
+
+    .ecu.active {
+      border-color: rgba(14, 165, 233, .4)
+    }
+
+    .ecu.compromised {
+      border-color: rgba(239, 68, 68, .5);
+      background: rgba(239, 68, 68, .06);
+      animation: pr 2s infinite
+    }
+
+    .ecu-left {
+      display: flex;
+      align-items: center;
+      gap: 10px
+    }
+
+    .eicon {
+      font-size: 16px
+    }
+
+    .eid {
+      font-size: 8px;
+      color: var(--muted);
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 2px
+    }
+
+    .ename {
+      font-size: 11px;
+      font-weight: 700
+    }
+
+    .estatus {
+      padding: 2px 8px;
+      border-radius: 4px;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: .5px
+    }
+
+    .es-n {
+      background: rgba(100, 116, 139, .12);
+      color: var(--muted)
+    }
+
+    .es-a {
+      background: rgba(14, 165, 233, .12);
+      color: var(--cyan)
+    }
+
+    .es-c {
+      background: rgba(239, 68, 68, .15);
+      color: var(--red)
+    }
+
+    /* Defenses */
+    .def-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 8px
+    }
+
+    .def {
+      background: var(--bg2);
+      border: 1px solid var(--bdr);
+      border-radius: 8px;
+      padding: 12px;
+      cursor: pointer;
+      transition: all .2s;
+      display: flex;
+      align-items: center;
+      gap: 12px
+    }
+
+    .def:hover {
+      border-color: var(--blue)
+    }
+
+    .def.on {
+      border-color: var(--green);
+      background: rgba(16, 185, 129, .05);
+      box-shadow: 0 0 16px rgba(16, 185, 129, .2)
+    }
+
+    .dicon {
+      font-size: 22px
+    }
+
+    .dinfo {
+      flex: 1
+    }
+
+    .dname {
+      font-size: 11px;
+      font-weight: 700;
+      margin-bottom: 2px
+    }
+
+    .ddesc {
+      font-size: 9px;
+      color: var(--muted);
+      line-height: 1.3
+    }
+
+    .dbadge {
+      padding: 3px 8px;
+      border-radius: 20px;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: .5px;
+      border: 1px solid
+    }
+
+    .def:not(.on) .dbadge {
+      color: var(--dim);
+      border-color: var(--dim)
+    }
+
+    .def.on .dbadge {
+      color: var(--green);
+      border-color: rgba(16, 185, 129, .4);
+      background: rgba(16, 185, 129, .1)
+    }
+
+    .dblocks {
+      font-size: 8px;
+      color: var(--muted);
+      margin-top: 3px
+    }
+
+    /* Monitor */
+    .logtabs {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 8px;
+      flex-wrap: wrap
+    }
+
+    .ltab {
+      padding: 5px 9px;
+      border-radius: 6px;
+      font-size: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      border: 1px solid var(--bdr);
+      color: var(--muted);
+      background: var(--bg2);
+      transition: all .2s
+    }
+
+    .ltab.on {
+      border-color: var(--blue);
+      color: var(--white);
+      background: rgba(59, 130, 246, .15)
+    }
+
+    .logview {
+      display: none;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px;
+      overflow-y: auto;
+      height: calc(100vh - 220px)
+    }
+
+    .logview.show {
+      display: block
+    }
+
+    .can-hd {
+      display: grid;
+      grid-template-columns: 50px 36px 48px 1fr 34px;
+      gap: 4px;
+      padding: 4px 0 6px;
+      border-bottom: 1px solid var(--bdr2);
+      color: var(--muted);
+      letter-spacing: 0.5px;
+      font-size: 8px;
+      font-weight: 700;
+      margin-bottom: 2px
+    }
+
+    .can-row {
+      display: grid;
+      grid-template-columns: 50px 36px 48px 1fr 34px;
+      gap: 4px;
+      padding: 3px 0;
+      border-bottom: 1px solid rgba(30, 58, 90, .4);
+      align-items: center;
+      font-size: 8px;
+    }
+
+    .can-row.r-att {
+      background: rgba(239, 68, 68, .05)
+    }
+
+    .can-row.r-blk {
+      background: rgba(16, 185, 129, .05);
+      opacity: .7
+    }
+
+    .ct {
+      color: var(--dim)
+    }
+
+    .ci {
+      color: var(--cyan)
+    }
+
+    .cd {
+      color: var(--muted);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap
+    }
+
+    .cs {
+      font-size: 8px;
+      padding: 2px 4px;
+      border-radius: 3px;
+      text-align: center
+    }
+
+    .cs-e {
+      background: rgba(59, 130, 246, .15);
+      color: var(--blue)
+    }
+
+    .cs-a {
+      background: rgba(239, 68, 68, .15);
+      color: var(--red)
+    }
+
+    .cs-b {
+      background: rgba(16, 185, 129, .15);
+      color: var(--green)
+    }
+
+    .can-row.r-att .ci {
+      color: var(--red)
+    }
+
+    .can-stats {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 8px
+    }
+
+    .cstat {
+      font-size: 9px;
+      color: var(--muted)
+    }
+
+    .cstat span {
+      font-family: 'JetBrains Mono', monospace;
+      font-weight: 700
+    }
+
+    .logrow {
+      padding: 5px 0;
+      border-bottom: 1px solid rgba(30, 58, 90, .3)
+    }
+
+    .lts {
+      color: var(--dim);
+      margin-right: 6px
+    }
+
+    .lmsg {
+      color: var(--muted)
+    }
+
+    .lv-block .lmsg {
+      color: var(--green)
+    }
+
+    .lv-warn .lmsg {
+      color: var(--yellow)
+    }
+
+    .lv-crit {
+      background: rgba(239, 68, 68, .05)
+    }
+
+    .lv-crit .lmsg {
+      color: var(--red)
+    }
+
+    @keyframes pr {
+
+      0%,
+      100% {
+        box-shadow: 0 0 0 rgba(239, 68, 68, 0)
+      }
+
+      50% {
+        box-shadow: 0 0 16px rgba(239, 68, 68, .4)
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="hbrand">
+      <div class="hlogo">🛡️</div>
+      <div>
+        <div class="htitle">Automotive Cybersecurity Simulation Lab</div>
+        <div class="hsub">Live Attack Terminal - Type real commands to drive the simulation · IOActive 2015 Research
+        </div>
+      </div>
+    </div>
+    <div class="hright">
+      <button id="resetBtn" class="badge b-warn"
+        style="font-size:9px; cursor:pointer; background:transparent; padding:4px 10px; margin-right:4px;"
+        onclick="resetLab()">🔄 RESET LAB</button>
+      <span class="badge b-sim" style="font-size:9px">🔒 SIMULATION ONLY</span>
+      <span class="lat-badge" id="latBadge">LTE: — ms</span>
+      <span class="badge b-ok" id="globalBadge">● SYSTEM SECURE</span>
+    </div>
+  </header>
+
+  <div class="app">
+
+    <!-- ═══════ LEFT: TERMINAL ═══════ -->
+    <div class="term-wrap">
+      <div class="term-head">
+        <div class="th-dots">
+          <div class="td td-r"></div>
+          <div class="td td-y"></div>
+          <div class="td td-g"></div>
+        </div>
+        <div class="th-title">kali@attacker-vm — bash</div>
+        <div class="th-user">attacker@kali</div>
+      </div>
+
+      <div class="term-stages">
+        <div class="ts-block active" id="ts1">01·Recon</div>
+        <div class="ts-block" id="ts2">02·Cellular</div>
+        <div class="ts-block" id="ts3">03·Firmware</div>
+        <div class="ts-block" id="ts4">04·PrivEsc</div>
+        <div class="ts-block" id="ts5">05·Pivot</div>
+        <div class="ts-block" id="ts6">06·CAN Inj</div>
+        <div class="ts-block" id="ts7" style="margin-top:4px">07·Compromised</div>
+      </div>
+
+      <div class="term-mission">
+        <div class="m-title">CURRENT MISSION</div>
+        <div class="m-text" id="mText">Scan the internet and discover the telematics unit.</div>
+        <div class="m-hint-btn" onclick="toggleHint()">💡 Show Hint</div>
+        <div class="m-hint-text" id="mHint">nmap -p 8080 100.72.18.0/24</div>
+      </div>
+
+      <div class="term-body" id="tBody">
+        <div class="tl tl-sys-warn">┌──────────────────────────────────────────────┐</div>
+        <div class="tl tl-sys-warn">│ Lab Ready — Interactive Terminal Initialized │</div>
+        <div class="tl tl-sys-warn">└──────────────────────────────────────────────┘</div>
+        <div class="tl"><span class="tl-pmpt">attacker@kali:~$</span><span class="tl-cmd">clear</span></div>
+      </div>
+
+      <div class="term-input-row">
+        <div class="ti-pmpt">attacker@kali:~$</div>
+        <input type="text" class="ti-field" id="tInput" placeholder="Type a command (or 'stage 1' to auto-solve) ..."
+          autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+
+    <!-- ═══════ CENTER: VEHICLE STATE ═══════ -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+
+      <div class="netpath">
+        <div class="nprow">
+          <div class="npnode np-att" id="np-att">⚔️ ATTACKER</div>
+          <div class="nparr">→</div>
+          <div class="npnode np-cell" id="np-cell">📡 LTE</div>
+          <div class="nparr">→</div>
+          <div class="npnode np-tcu" id="np-tcu">📻 TELEMATICS</div>
+          <div class="nparr">→</div>
+          <div class="npnode np-gw" id="np-gw">🔀 GATEWAY</div>
+          <div class="nparr">→</div>
+          <div class="npnode np-can" id="np-can">🔌 CAN BUS</div>
+          <div class="nparr">→</div>
+          <div class="npnode np-ecu" id="np-ecu">⚙️ ECUs</div>
+        </div>
+      </div>
+
+      <div class="card" style="display:flex;gap:12px;padding:12px">
+        <div style="flex:1">
+          <div class="gauges" style="margin-bottom:0">
+            <div class="gauge" id="g-eng">
+              <div class="glbl">Engine</div>
+              <div class="gval cv-r" id="gv-eng">OFF</div>
+              <div class="gunit">status</div>
+            </div>
+            <div class="gauge">
+              <div class="glbl">RPM</div>
+              <div class="gval cv-c" id="gv-rpm">0</div>
+              <div class="gunit">rev/min</div>
+            </div>
+            <div class="gauge">
+              <div class="glbl">Speed</div>
+              <div class="gval cv-c" id="gv-spd">0.0</div>
+              <div class="gunit">km/h</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="flex:1">
+        <div class="ctitle">Virtual ECUs</div>
+        <div class="ecu-grid">
+          <div class="ecu" id="ec-ECU1">
+            <div class="ecu-left">
+              <div class="eicon">🔧</div>
+              <div>
+                <div class="eid">ECU1 · 0x101/0x104</div>
+                <div class="ename">Engine Control</div>
+              </div>
+            </div>
+            <span class="estatus es-n" id="es-ECU1">NOM</span>
+          </div>
+          <div class="ecu" id="ec-ECU2">
+            <div class="ecu-left">
+              <div class="eicon">🛑</div>
+              <div>
+                <div class="eid">ECU2 · 0x102</div>
+                <div class="ename">Brake Control</div>
+              </div>
+            </div>
+            <span class="estatus es-n" id="es-ECU2">NOM</span>
+          </div>
+          <div class="ecu" id="ec-ECU3">
+            <div class="ecu-left">
+              <div class="eicon">🎯</div>
+              <div>
+                <div class="eid">ECU3 · 0x100</div>
+                <div class="ename">Steering</div>
+              </div>
+            </div>
+            <span class="estatus es-n" id="es-ECU3">NOM</span>
+          </div>
+          <div class="ecu" id="ec-ECU4">
+            <div class="ecu-left">
+              <div class="eicon">🚗</div>
+              <div>
+                <div class="eid">ECU4 · 0x103-0x106</div>
+                <div class="ename">Body Control</div>
+              </div>
+            </div>
+            <span class="estatus es-n" id="es-ECU4">NOM</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ═══════ RIGHT: DEFENSES & LOGS ═══════ -->
+    <div style="display:flex;flex-direction:column;gap:10px">
+
+      <div class="card">
+        <div class="ctitle">Defensive Controls</div>
+        <div class="def-grid">
+          <div class="def" id="dc-gf" onclick="toggleDef('gateway_filtering')">
+            <div class="dicon">🛡️</div>
+            <div class="dinfo">
+              <div class="dname">Gateway Filtering</div>
+              <div class="dblocks">Blocks unauthorized CAN frames</div>
+              <div class="dblocks" style="color:var(--dim)">Blocks Stage 06 & 07</div>
+            </div>
+            <div class="dbadge" id="db-gf">DISABLED</div>
+          </div>
+          <div class="def" id="dc-fv" onclick="toggleDef('firmware_verification')">
+            <div class="dicon">🔏</div>
+            <div class="dinfo">
+              <div class="dname">Firmware Signing</div>
+              <div class="dblocks">RSA-2048 on updates</div>
+              <div class="dblocks" style="color:var(--dim)">Blocks Stage 03</div>
+            </div>
+            <div class="dbadge" id="db-fv">DISABLED</div>
+          </div>
+          <div class="def" id="dc-aa" onclick="toggleDef('api_auth')">
+            <div class="dicon">🔐</div>
+            <div class="dinfo">
+              <div class="dname">API Authentication</div>
+              <div class="dblocks">Bearer token required</div>
+              <div class="dblocks" style="color:var(--dim)">Blocks Stage 04</div>
+            </div>
+            <div class="dbadge" id="db-aa">DISABLED</div>
+          </div>
+          <div class="def" id="dc-ns" onclick="toggleDef('network_segmentation')">
+            <div class="dicon">🔀</div>
+            <div class="dinfo">
+              <div class="dname">Net Segmentation</div>
+              <div class="dblocks">Isolates safety ECUs</div>
+              <div class="dblocks" style="color:var(--dim)">Blocks Stage 05</div>
+            </div>
+            <div class="dbadge" id="db-ns">DISABLED</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="flex:1">
+        <div class="logtabs">
+          <div class="ltab on" onclick="switchLog('can')" id="lt-can">🔌 CAN Bus</div>
+          <div class="ltab" onclick="switchLog('atk')" id="lt-atk">⚔️ Attacks</div>
+          <div class="ltab" onclick="switchLog('gw')" id="lt-gw">🔀 Gateway</div>
+          <div class="ltab" onclick="switchLog('ids')" id="lt-ids">👁️ IDS</div>
+        </div>
+        <div class="can-stats" id="can-stats-row">
+          <div class="cstat">Frames <span style="color:var(--cyan)" id="cs-tot">0</span></div>
+          <div class="cstat">Attack <span style="color:var(--red)" id="cs-att">0</span></div>
+          <div class="cstat">Blocked <span style="color:var(--green)" id="cs-blk">0</span></div>
+        </div>
+        <div id="can-hd-row" class="can-hd"><span>TIME</span><span>CAN
+            ID</span><span>TARGET</span><span>DATA</span><span>SRC</span></div>
+        <div class="logview show" id="lv-can"></div>
+        <div class="logview" id="lv-atk"></div>
+        <div class="logview" id="lv-gw"></div>
+        <div class="logview" id="lv-ids"></div>
+      </div>
+
+    </div>
+  </div><!-- end app -->
+
+  <script>
+    async function resetLab() {
+      try {
+        await fetch('/api/terminal', {
+          method: 'POST', body: JSON.stringify({ cmd: 'reset' })
+        });
+        document.getElementById('tBody').innerHTML = '';
+        printTerminal('', 'System Reset Initiated...', 'tl-sys-warn');
+      } catch (e) { }
+    }
+
+    // ── TERMINAL LOGIC ──────────────────────────────────────
+    const tb = document.getElementById('tBody');
+    const inp = document.getElementById('tInput');
+
+    // Auto focus
+    document.body.addEventListener('click', () => inp.focus());
+    inp.focus();
+
+    function printTerminal(pmpt, cmd, classAdd) {
+      const line = document.createElement('div');
+      line.className = 'tl ' + (classAdd || '');
+      if (pmpt) {
+        line.innerHTML = `<span class="tl-pmpt">${pmpt}</span><span class="tl-cmd">${cmd}</span>`;
+      } else {
+        line.textContent = cmd;
+      }
+      tb.appendChild(line);
+      tb.scrollTop = tb.scrollHeight;
+    }
+
+    // Typing effect for system responses
+    async function typeTerminal(text, cls) {
+      const line = document.createElement('div');
+      line.className = 'tl ' + (cls || '');
+      tb.appendChild(line);
+
+      // Fast typeout
+      for (let i = 0; i < text.length; i++) {
+        line.textContent += text[i];
+        if (i % 2 === 0) tb.scrollTop = tb.scrollHeight;
+        await new Promise(r => setTimeout(r, 2));
+      }
+    }
+
+    inp.addEventListener('keyup', async (e) => {
+      if (e.key === 'Enter') {
+        const cmd = inp.value.trim();
+        if (!cmd) return;
+        inp.value = '';
+
+        printTerminal('attacker@kali:~$', cmd);
+
+        // Server fetch
+        try {
+          const res = await fetch('/api/terminal', {
+            method: 'POST', body: JSON.stringify({ cmd })
+          });
+          const data = await res.json();
+
+          if (data.action === 'clear') {
+            tb.innerHTML = '';
+            return;
+          }
+
+          if (data.output) {
+            if (data.blocked) {
+              await typeTerminal(data.output, 'tl-err');
+            } else if (data.advance) {
+              await typeTerminal(data.output, 'tl-sys');
+            } else {
+              await typeTerminal(data.output, 'tl-sys-warn');
+            }
+          }
+
+          if (data.advance) {
+            // Update stage tracking
+            const curr = data.stage;
+            for (let i = 1; i < curr; i++) {
+              const t = document.getElementById('ts' + i);
+              if (t) t.className = 'ts-block done';
+            }
+            const act = document.getElementById('ts' + curr);
+            if (act) act.className = 'ts-block active';
+
+            // Update mission
+            if (data.next_mission) {
+              document.getElementById('mText').textContent = data.next_mission;
+              document.getElementById('mHint').textContent = data.next_hint;
+              document.getElementById('mHint').style.display = 'none';
+            }
+
+            // Let polling sync latency
+          }
+
+        } catch (err) {
+          printTerminal('', 'Error connecting to simulation kernel.', 'tl-err');
+        }
+      }
+    });
+
+    function toggleHint() {
+      const el = document.getElementById('mHint');
+      el.style.display = el.style.display === 'block' ? 'none' : 'block';
+    }
+
+    // ── DEFENSE UI ──────────────────────────────────────
+    const DEF_KEYS = { gateway_filtering: 'gf', firmware_verification: 'fv', api_auth: 'aa', network_segmentation: 'ns' };
+    async function toggleDef(feature) {
+      const res = await fetch('/api/defend/' + feature, { method: 'POST' });
+      const data = await res.json();
+      const k = DEF_KEYS[feature];
+      if (!k) return;
+      const card = document.getElementById('dc-' + k);
+      const badge = document.getElementById('db-' + k);
+      card.className = 'def' + (data.active ? ' on' : '');
+      badge.textContent = data.active ? 'ENABLED' : 'DISABLED';
+    }
+
+    // ── LOG TABS ────────────────────────────────────────
+    function switchLog(tab) {
+      ['can', 'atk', 'gw', 'ids'].forEach(t => {
+        document.getElementById('lv-' + t).className = 'logview' + (t === tab ? ' show' : '');
+        document.getElementById('lt-' + t).classList.toggle('on', t === tab);
+      });
+      document.getElementById('can-hd-row').style.display = tab === 'can' ? '' : 'none';
+      document.getElementById('can-stats-row').style.display = tab === 'can' ? '' : 'none';
+    }
+
+    // ── POLLING AND STATE SYNC ──────────────────────────
+    function applyState(s) {
+      const v = s.vehicle, a = s.attack, comp = v.compromised;
+
+      // Header badges
+      const gb = document.getElementById('globalBadge');
+      if (comp) { gb.className = 'badge b-crit'; gb.textContent = '⚠ VEHICLE COMPROMISED'; }
+      else if (a.stage > 0) { gb.className = 'badge b-warn'; gb.textContent = '⚠ ATTACK IN PROGRESS'; }
+      else { gb.className = 'badge b-ok'; gb.textContent = '● SYSTEM SECURE'; }
+      document.getElementById('latBadge').textContent = 'LTE: ' + (a.cellular_latency_ms || "—") + ' ms';
+
+      // Gauges
+      document.getElementById('gv-eng').textContent = v.engine_status;
+      document.getElementById('gv-eng').className = 'gval ' + (v.engine_status === 'ON' ? 'cv-g' : v.engine_status === 'CRANKING' ? 'cv-o' : 'cv-r');
+      document.getElementById('g-eng').className = 'gauge ' + (comp ? 'danger' : '');
+      document.getElementById('gv-rpm').textContent = v.engine_rpm.toLocaleString();
+      document.getElementById('gv-spd').textContent = v.speed_kmh.toFixed(1);
+
+      // Network path
+      const cid = ['att', 'cell', 'tcu', 'gw', 'can', 'ecu'];
+      cid.forEach(id => {
+        const el = document.getElementById('np-' + id);
+        if (!el) return;
+        el.classList.toggle('lit', (
+          (id === 'att' && a.stage >= 1) || (id === 'cell' && a.stage >= 2) ||
+          (id === 'tcu' && a.stage >= 3) || (id === 'gw' && a.stage >= 5) ||
+          (id === 'can' && a.stage >= 6) || (id === 'ecu' && a.stage >= 7)
+        ));
+        el.classList.toggle('hit', comp);
+      });
+
+      // ECU grid
+      Object.keys(s.ecus).forEach(id => {
+        if (id === 'ECU5') return; // skipping ECU5 visually due to space limits
+        const c = document.getElementById('ec-' + id), bg = document.getElementById('es-' + id);
+        if (!c) return;
+        if (comp) {
+          let compText = 'BREACHED';
+          if (id === 'ECU1') compText = v.engine_status === 'OFF' ? 'KILLED' : v.engine_status;
+          else if (id === 'ECU2') compText = v.brake_force > 0 ? v.brake_force + '%' : 'DISABLED';
+          else if (id === 'ECU3') compText = v.steering_angle + '°';
+          else if (id === 'ECU4') compText = v.doors_locked ? 'LOCKED' : 'UNLOCKED';
+          c.className = 'ecu compromised'; bg.className = 'estatus es-c'; bg.textContent = compText;
+        }
+        else if (s.ecus[id].status === 'ACTIVE') { c.className = 'ecu active'; bg.className = 'estatus es-a'; bg.textContent = 'ACTIVE'; }
+        else { c.className = 'ecu'; bg.className = 'estatus es-n'; bg.textContent = 'SAFE'; }
+      });
+    }
+
+    function applyCan(entries) {
+      let at = 0, bl = 0;
+      document.getElementById('lv-can').innerHTML = entries.map(e => {
+        const isa = e.source === 'ATTACKER';
+        if (isa) at++; if (e.blocked) bl++;
+        return `<div class="can-row ${e.blocked ? 'r-blk' : isa ? 'r-att' : ''}">
+      <span class="ct">${e.ts}</span><span class="ci">${e.id}</span>
+      <span class="ct">${e.target}</span><span class="cd">${e.data}</span>
+      <span class="cs ${e.blocked ? 'cs-b' : isa ? 'cs-a' : 'cs-e'}">${e.blocked ? 'BLK' : e.source.slice(0, 4)}</span>
+    </div>`;
+      }).join('') || '<div style="padding:10px;color:var(--dim)">No traffic</div>';
+      document.getElementById('cs-tot').textContent = entries.length;
+      document.getElementById('cs-att').textContent = at;
+      document.getElementById('cs-blk').textContent = bl;
+    }
+
+    function applyLogs(logs) {
+      document.getElementById('lv-atk').innerHTML = (logs.attack || []).map(e => `<div class="logrow"><span class="lts">${e.ts}</span><span class="lmsg" style="color:${e.blocked ? 'var(--green)' : 'var(--orange)'}">${e.blocked ? '🛡 BLOCKED' : '⚔️ ATTACK'} Stage ${e.stage}: ${e.label}</span></div>`).join('');
+      document.getElementById('lv-gw').innerHTML = (logs.gateway || []).map(e => `<div class="logrow ${e.level === 'BLOCK' ? 'lv-block' : e.level === 'WARN' ? 'lv-warn' : ''}"><span class="lts">${e.ts}</span><span class="lmsg">${e.msg}</span></div>`).join('');
+      document.getElementById('lv-ids').innerHTML = (logs.ids || []).map(e => `<div class="logrow lv-crit"><span class="lts">${e.ts}</span><span class="lmsg">🚨 ${e.alert}</span></div>`).join('');
+    }
+
+    async function fetchMissionInitially() {
+      try {
+        const m = await fetch('/api/mission').then(r => r.json());
+        document.getElementById('mText').textContent = m.mission;
+        document.getElementById('mHint').textContent = m.hint;
+      } catch (e) { }
+    }
+    fetchMissionInitially();
+
+    async function poll() {
+      try {
+        const [sr, cr, lr] = await Promise.all([fetch('/api/state'), fetch('/api/can_log'), fetch('/api/logs')]);
+        applyState(await sr.json()); applyCan(await cr.json()); applyLogs(await lr.json());
+      } catch (e) { }
+      setTimeout(poll, 800);
+    }
+    poll();
+  </script>
+</body>
+
+</html>
