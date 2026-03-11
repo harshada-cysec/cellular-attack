@@ -425,12 +425,17 @@ def get_mission():
 def index():
     return render_template("dashboard.html")
 
+import os
+from vehicle_sim import start_simulation
+
+# Automatically spawn simulation threads on import (required for gunicorn/production)
+start_simulation()
+
 if __name__ == "__main__":
-    from vehicle_sim import start_simulation
-    start_simulation()
     print("\n" + "="*62)
     print("  Automotive Cybersecurity Simulation Lab - TERMINAL EDITION")
     print("  SIMULATION ONLY — No real vehicles or networks involved")
     print("  Dashboard → http://localhost:5000")
     print("="*62 + "\n")
-    app.run(debug=False, host="0.0.0.0", port=5000, use_reloader=False)
+    port = int(os.environ.get("PORT", 5000))
+    app.run(debug=False, host="0.0.0.0", port=port, use_reloader=False)

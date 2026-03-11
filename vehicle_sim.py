@@ -272,7 +272,11 @@ def _ecu_infotainment():
         i += 1
         time.sleep(3)
 
+_sim_started = False
 def start_simulation():
+    global _sim_started
+    if _sim_started: return
+    _sim_started = True
     for fn in [_ecu_engine, _ecu_brake, _ecu_steering, _ecu_body, _ecu_infotainment]:
         threading.Thread(target=fn, daemon=True).start()
     log_gateway("Gateway initialized. All traffic permitted (default policy).", "INFO")
