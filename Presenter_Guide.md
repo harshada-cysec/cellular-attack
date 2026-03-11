@@ -1,6 +1,34 @@
 # Presenter Guide: Automotive Cellular Attack Simulation
 
-This guide is designed for the presenter demonstrating the Automotive Cybersecurity Lab. It provides the exact commands to type in the interactive terminal and the talking points to explain what is happening at each stage of the attack chain.
+This guide is designed for the presenter demonstrating the Automotive Cybersecurity Lab. It provides the necessary background context to brief students, along with the exact commands to type in the interactive terminal and the talking points to explain each stage of the attack chain.
+
+---
+
+## 📚 Background Context (Student Briefing)
+
+Before starting the simulation, provide students with this crucial real-world context on how modern vehicle architecture works and what exactly inspired this lab.
+
+### 1. What is the 2015 Jeep Cherokee Hack?
+- **The Event:** In 2015, security researchers Charlie Miller and Chris Valasek remotely hacked a 2015 Jeep Cherokee while a journalist was driving it 70 mph down a highway.
+- **The Impact:** They killed the engine, disabled the brakes, and took control of the steering wheel—all from their living room miles away via a cellular internet connection.
+- **The Result:** Fiat Chrysler recalled 1.4 million vehicles. It is considered the watershed moment that proved automotive cyberattacks were a lethal threat level. 
+
+### 2. What is Uconnect?
+- **The Target:** Uconnect is the branded name for the Infotainment and Telematics system inside fiat Chrysler vehicles (Dodges, Jeeps, Rams). 
+- **The Role:** A Telematics Control Unit (TCU) acts like a heavy smartphone permanently bolted into the car. It has a cellular LTE modem to provide features like remote unlock apps, GPS tracking, and Wi-Fi hotspots for passengers. 
+- **The Vulnerability:** In 2015, the Uconnect system had a specific communications port open to the public internet. Hackers could scan the Sprint cellular network, find the cars IP address, and connect directly to the Uconnect operating system without a password.
+
+### 3. What are ECUs and the CAN Bus?
+- **ECU (Electronic Control Unit):** Modern cars have 50 to 100 dedicated computers called ECUs. Each ECU is responsible for a single physical component (e.g., the Engine ECU controls fuel mapping; the Brake ECU controls ABS pressure).
+- **CAN Bus (Controller Area Network):** ECUs do not run traditional ethernet. They communicate over a specialized internal vehicle network called the CAN Bus. 
+- **The Fatal Flaw:** The CAN Bus was invented in the 1980s. It fundamentally lacks authentication. If any device on the network tells the Brake ECU to hit the brakes, the ECU assumes the command is legitimate and immediately complies. 
+
+### 4. How the Attack Chain Works (The Big Picture)
+1. **The Breach:** The attacker compromises the internet-facing Uconnect system (The Telematics Unit).
+2. **The Pivot:** Instead of stopping at the Infotainment system, the attacker rewrites the routing tables inside Uconnect to reach the internal, isolated CAN Bus. 
+3. **The Injection:** The attacker writes a script that floods the CAN Bus with malicious instructions addressed to the Engine, Brakes, and Steering ECUs. Because the CAN bus trusts everything, the physical car obeys the attacker instead of the driver.
+
+*This lab simulates exactly this attack chain in a controlled, virtual environment.*
 
 ---
 
